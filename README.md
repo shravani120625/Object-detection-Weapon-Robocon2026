@@ -1,4 +1,4 @@
-# Hand Gesture Detection (YOLOv8 + OpenCV + Raspberry Pi 5)
+# Hand Gesture Detection (YOLOv8 + OpenCV)
 
 This project runs real-time hand gesture detection for:
 - `fist`
@@ -6,8 +6,7 @@ This project runs real-time hand gesture detection for:
 - `spearhead`
 
 It supports:
-- USB webcam (`--source usb`) on Windows/Linux/Raspberry Pi
-- Raspberry Pi Camera Module (`--source picam`) on Raspberry Pi 5
+- USB webcam (`--source usb`) on Windows/Linux
 
 ## Project File
 
@@ -17,17 +16,8 @@ It supports:
 
 ### Windows (USB webcam)
 
-```bash
-pip install ultralytics opencv-python
-```
-
-### Raspberry Pi 5
-
-```bash
-sudo apt update
-sudo apt install -y python3-picamera2 python3-opencv
-pip install ultralytics
-```
+`bash
+pip install ultralytics opencv-python 
 
 ## 2) Model Weights
 
@@ -47,18 +37,12 @@ If your model is elsewhere, pass it with `--weights`.
 python camera_detect.py --source usb --camera 0 --weights runs/detect/train/weights/best.pt
 ```
 
-### Raspberry Pi camera module
-
-```bash
-python camera_detect.py --source picam --weights runs/detect/train/weights/best.pt
-```
-
 Press `q` to quit.
 
 ## 4) Recommended Stable Settings (palm/fist confusion)
 
 ```bash
-python camera_detect.py --source picam --conf 0.45 --smooth-window 9 --stable-min-votes 5 --min-box-area 8000
+python camera_detect.py --source usb --conf 0.45 --smooth-window 9 --stable-min-votes 5 --min-box-area 8000
 ```
 
 Useful tuning:

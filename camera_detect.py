@@ -31,23 +31,6 @@ def open_usb_camera(camera_index: int, width: int | None = None, height: int | N
     )
 
 
-def open_picamera(width: int, height: int):
-    """Open Raspberry Pi Camera Module using picamera2."""
-    try:
-        from picamera2 import Picamera2
-    except ImportError as exc:
-        raise RuntimeError(
-            "picamera2 is not installed. On Raspberry Pi, run: sudo apt install python3-picamera2"
-        ) from exc
-
-    cam = Picamera2()
-    config = cam.create_preview_configuration(main={"size": (width, height), "format": "RGB888"})
-    cam.configure(config)
-    cam.start()
-    print("Pi Camera opened with picamera2")
-    return cam
-
-
 def get_primary_detection(result, min_box_area: float):
     """Return best detection as (label, conf) after area filtering."""
     boxes = result.boxes
@@ -82,8 +65,8 @@ def main() -> None:
         "--source",
         type=str,
         default="usb",
-        choices=["usb", "picam"],
-        help="Camera source: 'usb' for webcam, 'picam' for Raspberry Pi Camera Module",
+        choices=["usb"],
+        help="Camera source: 'usb' for webcam",
     )
     parser.add_argument("--camera", type=int, default=0, help="Preferred camera index")
     parser.add_argument("--conf", type=float, default=0.35, help="Confidence threshold")
@@ -116,26 +99,17 @@ def main() -> None:
         raise FileNotFoundError(f"Weights not found: {weights_path.resolve()}")
 
     model = YOLO(str(weights_path))
-    cap = None
-    picam = None
-    if args.source == "usb":
-        cap = open_usb_camera(args.camera, args.width, args.height)
-    else:
-        picam = open_picamera(args.width, args.height)
+    cap = open_usb_camera(args.camera, args.width, args.height)
 
     print("Starting live detection. Press 'q' to quit.")
     label_history = deque(maxlen=max(1, args.smooth_window))
 
     try:
         while True:
-            if args.source == "usb":
-                ok, frame = cap.read()
-                if not ok:
-                    print("Failed to read frame from USB camera.")
-                    break
-            else:
-                frame_rgb = picam.capture_array()
-                frame = cv2.cvtColor(frame_rgb, cv2.COLOR_RGB2BGR)
+            ok, frame = cap.read()
+            if not ok:
+                print("Failed to read frame from USB camera.")
+                break
 
             result = model.predict(
                 source=frame,
@@ -173,10 +147,7 @@ def main() -> None:
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
     finally:
-        if cap is not None:
-            cap.release()
-        if picam is not None:
-            picam.stop()
+        cap.release()
         cv2.destroyAllWindows()
 
 

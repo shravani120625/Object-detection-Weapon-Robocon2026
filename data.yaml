@@ -1,0 +1,6 @@
+path: C:\Users\ASUS\OneDrive\Documents\Prixx Robotics\Weapon detection Robocon2026\dataset  # dataset root
+train: train/images
+val: val/images
+
+nc: 3  # number of classes
+names: ['fist', 'palm', 'spearhead']  # class names
